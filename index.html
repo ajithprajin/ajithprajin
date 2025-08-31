@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSM Enterprises Catalogue</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 10px; background: #fff7f0; }
+    h1 { text-align: center; font-size: 1.6em; margin-bottom: 15px; }
+
+    /* Top bar with categories + filters + contact */
+    #filters { 
+      display: flex; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+      gap: 8px; 
+      margin-bottom: 15px; 
+    }
+    #filters button {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #ff9933; 
+      color: white; 
+      font-size: 0.9em;
+      transition: 0.2s;
+    }
+    #filters button:hover { background: #e67e00; }
+    #filters button.active { background: #cc6600; }
+
+    /* Dropdown filter */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: white;
+      min-width: 240px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      z-index: 1000;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .dropdown-content label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 0.9em;
+    }
+    .dropdown-content input[type="checkbox"] {
+      transform: scale(1.2);
+    }
+    .dropdown-content select, .dropdown-content button {
+      width: 100%;
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .dropdown-content button {
+      background: #25D366;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Products grid */
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+      gap: 15px; 
+    }
+    .card { 
+      background: white; 
+      padding: 10px; 
+      border-radius: 12px; 
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15); 
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card img { 
+      width: 100%; 
+      height: 150px; 
+      object-fit: cover; 
+      border-radius: 8px; 
+    }
+    .card h3 { font-size: 1.1em; margin: 8px 0; cursor: pointer; }
+    .card p { font-size: 0.9em; margin: 3px 0; }
+    .price { color: green; font-weight: bold; font-size: 1em; margin-top: auto; }
+    .order-btn { 
+      display: block; 
+      text-align: center; 
+      margin-top: 8px; 
+      padding: 10px; 
+      background: #25D366; 
+      color: white; 
+      border-radius: 6px; 
+      text-decoration: none; 
+      font-size: 0.9em;
+    }
+
+    /* Bulk orders line */
+    #bulkLine {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+    #bulkLine a { color: #cc6600; font-weight: bold; text-decoration: underline; }
+
+    /* Diya decorations */
+    .diya { position: absolute; top: 5px; width: 68px; height: 68px; }
+    .diya.left { left: 5px; }
+    .diya.right { right: 5px; }
+
+    /* Mobile tweaks */
+    @media (max-width: 600px) {
+      h1 { font-size: 1.3em; }
+      .grid { grid-template-columns: 1fr; }
+      #filters { flex-direction: row; flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <img src="https://i.postimg.cc/W1FWzN1R/diya-image.png" class="diya left" alt="Diya">
+  <img src="https://i.postimg.cc/W1FWzN1R/diya-image.png" class="diya right" alt="Diya">
+
+  <h1>SSM Enterprises Catalogue</h1>
+
+  <!-- Categories & Filters -->
+  <div id="filters">
+    <button onclick="filterByCategory('Showcase', this)">Showcase</button>
+    <button onclick="filterByCategory('Wall hanging', this)">Wall hanging</button>
+    <button onclick="filterByCategory('Devotional', this)">Devotional</button>
+    <button onclick="filterByCategory('Stationery', this)">Stationery</button>
+    <button onclick="filterByCategory('Groceries', this)">Groceries</button>
+
+    <div class="dropdown">
+      <button onclick="toggleDropdown()">Filters ⬇</button>
+      <div id="filterDropdown" class="dropdown-content">
+        <label><strong>Select All</strong> <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></label>
+        <div id="tagOptions"></div>
+        <select id="sortPrice">
+          <option value="">Sort by Price</option>
+          <option value="asc">Low to High</option>
+          <option value="desc">High to Low</option>
+        </select>
+        <button onclick="applyTagFilters()">Apply</button>
+      </div>
+    </div>
+
+    <button onclick="location.href='contactus.html'">Contact Us</button>
+  </div>
+
+  <p id="bulkLine">For bulk orders, party orders, please <a href="contactus.html">contact us</a>.</p>
+
+  <!-- Products -->
+  <div id="products" class="grid"></div>
+
+  <!-- Item Detail View -->
+<div id="itemDetail" style="display:none; padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.2); margin-top:20px;">
+  <button onclick="closeDetail()" style="margin-bottom:10px; padding:8px 12px; border:none; border-radius:6px; background:#ff9933; color:white; cursor:pointer;">Home</button>
+  <div id="detailContent"></div>
+</div>
+
+  <script>
+    const sheetID = "1zMmv9xpsmLJhQ2ZlIiPkElAY3eVIeiuMObrM5Qtz_34";
+    const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+
+    let productsData = [];
+    let currentCategory = "";
+    let selectedTags = new Set();
+    let activeCategoryButton = null;
+
+    fetch(url)
+      .then(res => res.text())
+      .then(data => {
+        const json = JSON.parse(data.substring(47).slice(0, -2));
+        const rows = json.table.rows;
+
+        productsData = rows.map(row => ({
+          name: row.c[0]?.v || "",
+          category: row.c[1]?.v?.trim() || "",
+          tags: (row.c[2]?.v || "").split(",").map(t => t.trim()).filter(Boolean),
+          details: row.c[3]?.v || "",
+          qty: row.c[4]?.v || "",
+          price: parseFloat(row.c[5]?.v) || 0,
+          img: row.c[6]?.v || ""
+        }));
+
+        populateTagFilters();
+        renderProducts(productsData);
+      });
+
+function renderProducts(products) {
+  let html = "";
+  products.forEach((p) => {
+    html += `
+      <div class="card" onclick='showDetail(${JSON.stringify(p)})' style="cursor:pointer;">
+        <img src="${p.img}" alt="${p.name}">
+        <h3>${p.name}</h3>
+        <p>${p.details}</p>
+        <p><strong>Category:</strong> ${p.category}</p>
+        <p><strong>In stock:</strong> ${p.qty}</p>
+        <p class="price">₹${p.price}</p>
+        <a class="order-btn" href="https://wa.me/918056880598?text=Hi,%20I%20want%20to%20buy%20${encodeURIComponent(p.name)}" target="_blank">Order</a>
+      </div>
+    `;
+  });
+  document.getElementById("products").innerHTML = html;
+}
+
+
+    function filterByCategory(category, btn) {
+      // toggle off if same category clicked
+      if (currentCategory.toLowerCase() === category.toLowerCase()) {
+        currentCategory = "";
+        if (activeCategoryButton) activeCategoryButton.classList.remove("active");
+        activeCategoryButton = null;
+      } else {
+        currentCategory = category;
+        if (activeCategoryButton) activeCategoryButton.classList.remove("active");
+        activeCategoryButton = btn;
+        activeCategoryButton.classList.add("active");
+      }
+      populateTagFilters();
+      applyTagFilters();
+    }
+
+    function toggleDropdown() {
+      const dd = document.getElementById("filterDropdown");
+      dd.style.display = (dd.style.display === "block") ? "none" : "block";
+    }
+
+    function populateTagFilters() {
+      const tagSet = new Map();
+
+      let scope = productsData;
+      if (currentCategory) {
+        scope = productsData.filter(p => p.category.trim().toLowerCase() === currentCategory.trim().toLowerCase());
+      }
+
+      scope.forEach(p => p.tags.forEach(tag => {
+        tagSet.set(tag, (tagSet.get(tag) || 0) + 1);
+      }));
+
+      const tagOptions = document.getElementById("tagOptions");
+      tagOptions.innerHTML = "";
+      tagSet.forEach((count, tag) => {
+        tagOptions.innerHTML += `
+          <label>${tag} (${count}) <input type="checkbox" value="${tag}" onchange="toggleTag(this)" ${selectedTags.has(tag) ? "checked" : ""}></label>
+        `;
+      });
+      document.getElementById("selectAll").checked = (selectedTags.size === tagSet.size && tagSet.size > 0);
+    }
+
+    function toggleTag(cb) {
+      if (cb.checked) {
+        selectedTags.add(cb.value);
+      } else {
+        selectedTags.delete(cb.value);
+      }
+    }
+
+    function toggleSelectAll(cb) {
+      const checkboxes = document.querySelectorAll("#tagOptions input[type='checkbox']");
+      selectedTags.clear();
+      if (cb.checked) {
+        checkboxes.forEach(chk => { chk.checked = true; selectedTags.add(chk.value); });
+      } else {
+        checkboxes.forEach(chk => chk.checked = false);
+      }
+    }
+
+    function applyTagFilters() {
+      const sortPrice = document.getElementById("sortPrice").value;
+
+      let filtered = productsData.filter(p => {
+        const matchesCategory = !currentCategory || p.category.trim().toLowerCase() === currentCategory.trim().toLowerCase();
+        const matchesTags = selectedTags.size === 0 || p.tags.some(t => selectedTags.has(t));
+        return matchesCategory && matchesTags;
+      });
+
+      if (sortPrice === "asc") {
+        filtered.sort((a, b) => a.price - b.price);
+      } else if (sortPrice === "desc") {
+        filtered.sort((a, b) => b.price - a.price);
+      }
+
+      renderProducts(filtered);
+      document.getElementById("filterDropdown").style.display = "none";
+    }
+
+
+
+let lastScroll = 0; // To save scroll position
+
+function showDetail(product) {
+  // Save scroll position
+  lastScroll = window.scrollY || window.pageYOffset;
+
+  const detailDiv = document.getElementById("itemDetail");
+  const contentDiv = document.getElementById("detailContent");
+
+  contentDiv.innerHTML = `
+    <h2>${product.name}</h2>
+    <img src="${product.img}" alt="${product.name}" style="width:100%; max-width:400px; border-radius:8px;">
+    <p><strong>Category:</strong> ${product.category}</p>
+    <p><strong>Tags:</strong> ${product.tags.join(', ')}</p>
+    <p><strong>Details:</strong> ${product.details}</p>
+    <p><strong>In stock:</strong> ${product.qty}</p>
+    <p class="price">₹${product.price}</p>
+    <a class="order-btn" href="https://wa.me/918056880598?text=Hi,%20I%20want%20to%20buy%20${encodeURIComponent(product.name)}" target="_blank">Order</a>
+  `;
+
+  // Hide product grid, show detail
+  document.getElementById("products").style.display = "none";
+  detailDiv.style.display = "block";
+
+// Push a new state into browser history
+  history.pushState({ detail: true }, "", "#detail");
+
+}
+
+function closeDetail() {
+  const detailDiv = document.getElementById("itemDetail");
+  detailDiv.style.display = "none";
+  document.getElementById("products").style.display = "grid";
+
+  // Restore previous scroll position
+  window.scrollTo({ top: lastScroll, behavior: 'auto' });
+}
+
+window.addEventListener("popstate", function(event) {
+  const detailDiv = document.getElementById("itemDetail");
+
+  // If the detail view is open, close it and restore products
+  if (detailDiv.style.display === "block") {
+    closeDetail();
+  }
+});
+
+
+  </script>
+
+    <!-- Floating WhatsApp Buttons -->
+  <a href="https://chat.whatsapp.com/XXXXXXXXXXX" target="_blank" 
+     style="position: fixed; bottom: 80px; right: 20px; background: #25D366; color: white; padding: 12px 14px; border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); text-align:center; text-decoration:none; z-index: 999;">
+    👥
+  </a>
+  <!-- Direct WhatsApp -->
+  <a href="https://wa.me/918056880598" target="_blank" 
+     style="position: fixed; bottom: 20px; right: 20px; background: #25D366; padding: 12px; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.3); text-align:center; z-index: 999;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" viewBox="0 0 24 24">
+      <path d="M16.7 13.1c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.2-1.5-.8-.7-1.4-1.6-1.6-1.9-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.6s-.7-1.7-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.7s1.2 3.2 1.4 3.4c.2.2 2.4 3.7 5.9 5.2.8.4 1.4.6 1.9.8.8.2 1.5.2 2.1.1.7-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.3-.3-.4-.6-.5z"/>
+      <path d="M20.5 3.5c-2.2-2.2-5.1-3.5-8.2-3.5C5.4 0 0 5.4 0 12c0 2.1.5 4.1 1.5 5.9L0 24l6.3-1.6c1.7.9 3.7 1.3 5.8 1.3 6.6 0 12-5.4 12-12 0-3.1-1.3-6-3.6-8.2zM12.1 21.2c-1.8 0-3.5-.5-5-1.3l-.4-.2-3.7 1 1-3.6-.2-.4c-.9-1.5-1.3-3.2-1.3-5 0-5.4 4.4-9.8 9.8-9.8 2.6 0 5.1 1 7 2.9s2.9 4.4 2.9 7c.1 5.5-4.3 9.9-9.7 9.9z"/>
+    </svg>
+  </a>
+
+</body>
+</html>

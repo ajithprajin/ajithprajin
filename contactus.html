@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - SSM Enterprises</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #fff8f0; text-align: center; padding: 20px; }
+    h1 { color: #e65100; }
+    p { font-size: 1em; margin: 10px 0; }
+    input, button {
+      padding: 10px; margin-top: 10px; width: 80%; max-width: 400px;
+      border-radius: 6px; border: 1px solid #ccc; font-size: 1em;
+    }
+    button { background: #25D366; color: white; border: none; cursor: pointer; }
+    a.homeBtn {
+      display: inline-block; margin-top: 20px; padding: 8px 12px;
+      background: #e65100; color: white; border-radius: 6px; text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Contact Us</h1>
+  <p><strong>Sri Sevvel Murugan Enterprises</strong></p>
+  <p>Email: sevvelmurugan1925@gmail.com</p>
+  <input id="queryInput" type="text" placeholder="Enter your item query">
+  <button onclick="sendQuery()">Send via WhatsApp</button>
+  <br>
+  <a href="index.html" class="homeBtn">⬅ Back to Catalogue</a>
+
+  <script>
+    function sendQuery() {
+      const query = document.getElementById("queryInput").value;
+      window.open(`https://wa.me/918056880598?text=Hi,%20I%20have%20a%20query:%20${encodeURIComponent(query)}`, "_blank");
+    }
+  </script>
+</body>
+</html>
